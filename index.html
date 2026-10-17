@@ -1,0 +1,857 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>亦起跑跑团马拉松物资清单</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", sans-serif;
+            background: #eef1f6;
+            color: #1f2430;
+            min-height: 100vh;
+            padding: 16px;
+        }
+
+        .container {
+            max-width: 880px;
+            margin: 0 auto;
+            background: #fff;
+            border-radius: 16px;
+            box-shadow: 0 8px 28px rgba(28, 39, 68, 0.08);
+            padding: 22px 22px 28px;
+        }
+
+        .header {
+            display: flex;
+            align-items: center;
+            gap: 14px;
+            margin-bottom: 12px;
+        }
+
+        .logo {
+            width: 84px;
+            height: 84px;
+            object-fit: contain;
+            flex-shrink: 0;
+        }
+
+        h1 {
+            font-size: 26px;
+            line-height: 1.25;
+            font-weight: 700;
+        }
+
+        .subtitle {
+            margin-top: 4px;
+            font-size: 14px;
+            line-height: 1.3;
+            color: #8a6270;
+        }
+
+        .race {
+            border: 1px solid #e6eaf2;
+            background: #f7f9fc;
+            border-radius: 10px;
+            padding: 6px 8px 6px;
+            margin-bottom: 12px;
+        }
+
+        .race-controls {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 6px 12px;
+            align-items: center;
+            margin-bottom: 4px;
+        }
+
+        .race-controls label {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            font-size: 14px;
+            color: #4d5668;
+        }
+
+        .race-controls input,
+        .race-controls select {
+            font-size: 14px;
+            padding: 4px 8px;
+            border: 1px solid #d5dbe6;
+            border-radius: 8px;
+            background: #fff;
+            color: #1f2430;
+        }
+
+        .hourly {
+            display: flex;
+            flex-wrap: nowrap;
+            gap: 2px;
+            overflow-x: auto;
+            -webkit-overflow-scrolling: touch;
+        }
+
+        .hour {
+            flex: 1 1 0;
+            min-width: 34px;
+            text-align: center;
+            background: #fff;
+            border-radius: 6px;
+            padding: 2px 1px;
+            line-height: 1.1;
+        }
+
+        .hour-time {
+            font-size: 10px;
+            color: #667085;
+        }
+
+        .hour-icon {
+            font-size: 12px;
+            line-height: 1;
+        }
+
+        .hour-temp {
+            font-size: 11px;
+            font-weight: 650;
+        }
+
+        .hour-rain {
+            font-size: 9px;
+            color: #6d7c93;
+        }
+
+        .weather-note {
+            flex: 1;
+            font-size: 12px;
+            color: #8b93a3;
+            text-align: center;
+            padding: 2px 0;
+            white-space: nowrap;
+        }
+
+        .user-section {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            margin-bottom: 14px;
+        }
+
+        .user-row {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            align-items: center;
+        }
+
+        .user-section select,
+        .user-section input,
+        .add-category input,
+        .add-item-row input {
+            font-size: 18px;
+            padding: 7px 10px;
+            border: 1px solid #d5dbe6;
+            border-radius: 8px;
+            outline: none;
+            background: #fff;
+        }
+
+        .user-section select:focus,
+        .user-section input:focus,
+        .add-category input:focus,
+        .add-item-row input:focus {
+            border-color: #3d6dff;
+        }
+
+        .user-status {
+            font-size: 15px;
+            color: #5c6578;
+            min-height: 1.2em;
+        }
+
+        .user-status.error {
+            color: #c5374a;
+        }
+
+        .user-status.ok {
+            color: #1f9d55;
+        }
+
+        button {
+            font-family: inherit;
+            cursor: pointer;
+        }
+
+        .btn {
+            font-size: 16px;
+            padding: 7px 12px;
+            border: none;
+            border-radius: 8px;
+            color: #fff;
+            background: linear-gradient(135deg, #e23b4a, #3d6dff);
+        }
+
+        .btn-danger {
+            background: #e23b4a;
+        }
+
+        .category {
+            margin-bottom: 12px;
+        }
+
+        .category-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 8px;
+            background: linear-gradient(135deg, #e23b4a, #3d6dff);
+            color: #fff;
+            border-radius: 10px;
+            padding: 7px 12px;
+            margin-bottom: 4px;
+        }
+
+        .category-name {
+            font-size: 20px;
+            font-weight: 700;
+            line-height: 1.2;
+        }
+
+        .item {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding: 3px 6px;
+            border-radius: 8px;
+        }
+
+        .item:hover {
+            background: #f4f6fb;
+        }
+
+        .checkbox {
+            width: 26px;
+            height: 26px;
+            flex-shrink: 0;
+            border-radius: 6px;
+            border: 3px solid #e23b4a;
+            background: transparent;
+            color: transparent;
+            font-size: 16px;
+            line-height: 1;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .checkbox.checked {
+            background: #1f9d55;
+            border-color: #1f9d55;
+            color: #fff;
+        }
+
+        .item-content {
+            flex: 1;
+            font-size: 20px;
+            line-height: 1.25;
+        }
+
+        .delete-item-btn,
+        .delete-category-btn {
+            flex-shrink: 0;
+            border: none;
+            background: transparent;
+            color: #c5374a;
+            font-size: 15px;
+            padding: 2px 4px;
+        }
+
+        .delete-category-btn {
+            color: #fff;
+            background: rgba(255, 255, 255, 0.18);
+            border-radius: 6px;
+            padding: 3px 8px;
+        }
+
+        .add-item-row,
+        .add-category {
+            display: flex;
+            gap: 8px;
+            align-items: center;
+            margin-top: 2px;
+        }
+
+        .add-item-row input,
+        .add-category input {
+            flex: 1;
+            min-width: 0;
+        }
+
+        .add-category {
+            margin-top: 8px;
+        }
+
+        .empty-state {
+            text-align: center;
+            color: #8b93a3;
+            padding: 28px 10px 18px;
+        }
+
+        .empty-state h2 {
+            font-size: 20px;
+            font-weight: 600;
+            margin-bottom: 4px;
+            color: #5c6578;
+        }
+
+        .empty-state p {
+            font-size: 16px;
+            line-height: 1.35;
+        }
+
+        .hidden {
+            display: none;
+        }
+
+        @media (max-width: 720px) {
+            .container {
+                padding: 16px 12px 22px;
+            }
+
+            h1 {
+                font-size: 22px;
+            }
+
+            .logo {
+                width: 68px;
+                height: 68px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header class="header">
+            <img class="logo" src="assets/logo.png" alt="亦起跑跑团">
+            <div>
+                <h1>《亦起跑跑团马拉松物资清单》</h1>
+                <p class="subtitle">点击红色CheckBox表示相应物品准备完毕</p>
+            </div>
+        </header>
+
+        <section class="race">
+            <div class="race-controls">
+                <label>跑马日期
+                    <input type="date" id="raceDate" value="2026-10-25">
+                </label>
+                <label>城区
+                    <select id="districtSelect">
+                        <option value="北京东城区">北京东城区</option>
+                        <option value="北京西城区">北京西城区</option>
+                        <option value="北京朝阳区">北京朝阳区</option>
+                        <option value="北京海淀区">北京海淀区</option>
+                        <option value="北京丰台区">北京丰台区</option>
+                        <option value="北京石景山区">北京石景山区</option>
+                        <option value="北京门头沟区">北京门头沟区</option>
+                        <option value="北京房山区" selected>北京房山区</option>
+                        <option value="北京通州区">北京通州区</option>
+                        <option value="北京顺义区">北京顺义区</option>
+                        <option value="北京昌平区">北京昌平区</option>
+                        <option value="北京大兴区">北京大兴区</option>
+                        <option value="北京怀柔区">北京怀柔区</option>
+                        <option value="北京平谷区">北京平谷区</option>
+                        <option value="北京密云区">北京密云区</option>
+                        <option value="北京延庆区">北京延庆区</option>
+                    </select>
+                </label>
+            </div>
+            <div class="hourly" id="hourly">
+                <p class="weather-note">正在读取当天 6:00–14:00 预报</p>
+            </div>
+        </section>
+
+        <div class="user-section">
+            <div class="user-row">
+                <select id="userSelect">
+                    <option value="">选择已有用户</option>
+                </select>
+                <input type="password" id="loginPassword" placeholder="输入密码进入" autocomplete="current-password">
+                <button type="button" class="btn" id="loginBtn">进入</button>
+                <button type="button" class="btn" id="logoutBtn">退出</button>
+                <button type="button" class="btn btn-danger" id="deleteUserBtn">删除用户</button>
+            </div>
+            <div class="user-row">
+                <input type="text" id="newUserName" placeholder="新用户名" autocomplete="username">
+                <input type="password" id="newUserPassword" placeholder="设置密码" autocomplete="new-password">
+                <input type="password" id="newUserPassword2" placeholder="确认密码" autocomplete="new-password">
+                <button type="button" class="btn" id="addUserBtn">注册用户</button>
+            </div>
+            <p class="user-status" id="userStatus"></p>
+        </div>
+
+        <div id="checklist"></div>
+
+        <div class="add-category hidden" id="addCategoryRow">
+            <input type="text" id="newCategoryName" placeholder="新类别名称" autocomplete="off">
+            <button type="button" class="btn" id="addCategoryBtn">添加类别</button>
+        </div>
+    </div>
+
+    <script>
+        const STORAGE_KEY = "running_checklist_users";
+        const RACE_KEY = "running_checklist_race";
+
+        const DISTRICTS = {
+            "北京东城区": [39.9288, 116.416],
+            "北京西城区": [39.9123, 116.3659],
+            "北京朝阳区": [39.9215, 116.4432],
+            "北京海淀区": [39.9593, 116.2982],
+            "北京丰台区": [39.8585, 116.2867],
+            "北京石景山区": [39.9063, 116.2229],
+            "北京门头沟区": [39.9404, 116.1017],
+            "北京房山区": [39.7355, 116.1433],
+            "北京通州区": [39.9097, 116.6564],
+            "北京顺义区": [40.1302, 116.6548],
+            "北京昌平区": [40.2207, 116.2312],
+            "北京大兴区": [39.7268, 116.3414],
+            "北京怀柔区": [40.316, 116.6319],
+            "北京平谷区": [40.1406, 117.1214],
+            "北京密云区": [40.3769, 116.8431],
+            "北京延庆区": [40.4566, 115.9748]
+        };
+
+        const defaultCategories = [
+            {
+                name: "穿戴衣物",
+                items: [
+                    { name: "速干半袖（跑团团服） - 不要使用棉线材质半袖", checked: false },
+                    { name: "运动短裤 - 速干短裤、或者防磨短裤", checked: false },
+                    { name: "跑步袜", checked: false },
+                    { name: "跑鞋 - 不要用新鞋、系双重鞋带，防止松脱", checked: false },
+                    { name: "遮阳帽 - 遮阳、吸汗", checked: false },
+                    { name: "一次性雨衣 – 到达起跑处开始穿用于防冻，开始起跑后丢在马路边", checked: false },
+                    { name: "Sports Bra（女生）", checked: false },
+                    { name: "头绳（女生）", checked: false }
+                ]
+            },
+            {
+                name: "穿戴物品",
+                items: [
+                    { name: "太阳镜", checked: false },
+                    { name: "运动手表 - 提前充电，记录心率、配速及成绩", checked: false },
+                    { name: "护腕 - 擦汗", checked: false },
+                    { name: "腰包、跑步背心 - 用于放手机、能量棒、盐丸等", checked: false },
+                    { name: "存包袋以及存包卡（在组委会的发放的物资包中，若不存包，可以不带）", checked: false }
+                ]
+            },
+            {
+                name: "涂抹及食品",
+                items: [
+                    { name: "防晒霜", checked: false },
+                    { name: "凡士林 - 腋下、乳头、裆部、脚步易磨部位（容易出血 - 全马必须）", checked: false },
+                    { name: "肌肉贴 - 可选", checked: false },
+                    { name: "能量胶 – 跑前及10公里处吃", checked: false },
+                    { name: "盐丸 – 10公里处吃", checked: false }
+                ]
+            },
+            {
+                name: "重要物品",
+                items: [
+                    { name: "号码簿 - 提前固定在运动衣上", checked: false },
+                    { name: "手机 - 提前充好电", checked: false },
+                    { name: "充电宝 - 若需要", checked: false }
+                ]
+            }
+        ];
+
+        const WEATHER_ICONS = {
+            0: "☀️", 1: "🌤️", 2: "⛅", 3: "☁️",
+            45: "🌫️", 48: "🌫️",
+            51: "🌦️", 53: "🌦️", 55: "🌧️",
+            61: "🌦️", 63: "🌧️", 65: "🌧️",
+            71: "🌨️", 73: "❄️", 75: "❄️",
+            80: "🌦️", 81: "🌧️", 82: "🌧️",
+            95: "⛈️", 96: "⛈️", 99: "⛈️"
+        };
+
+        let users = {};
+        let currentUser = "";
+
+        const checklistEl = document.getElementById("checklist");
+        const userSelect = document.getElementById("userSelect");
+        const addCategoryRow = document.getElementById("addCategoryRow");
+        const userStatus = document.getElementById("userStatus");
+
+        function esc(text) {
+            return String(text).replace(/[&<>"']/g, (ch) => ({
+                "&": "&amp;",
+                "<": "&lt;",
+                ">": "&gt;",
+                '"': "&quot;",
+                "'": "&#39;"
+            }[ch]));
+        }
+
+        function setStatus(text, type) {
+            userStatus.textContent = text || "";
+            userStatus.className = "user-status" + (type ? ` ${type}` : "");
+        }
+
+        function hashPassword(password) {
+            const text = `running-checklist:${password}`;
+            let hash = 2166136261;
+            for (let i = 0; i < text.length; i += 1) {
+                hash ^= text.charCodeAt(i);
+                hash = Math.imul(hash, 16777619);
+            }
+            return `local-${(hash >>> 0).toString(16)}-${text.length}`;
+        }
+
+        function normalizeUsers(raw) {
+            const next = {};
+            Object.keys(raw || {}).forEach((name) => {
+                const value = raw[name];
+                if (Array.isArray(value)) {
+                    next[name] = { passwordHash: "", categories: value };
+                } else if (value && Array.isArray(value.categories)) {
+                    next[name] = {
+                        passwordHash: value.passwordHash || "",
+                        categories: value.categories
+                    };
+                }
+            });
+            return next;
+        }
+
+        function currentCategories() {
+            return currentUser && users[currentUser] ? users[currentUser].categories : null;
+        }
+
+        function loadUsers() {
+            try {
+                users = normalizeUsers(JSON.parse(localStorage.getItem(STORAGE_KEY)) || {});
+            } catch (error) {
+                users = {};
+            }
+        }
+
+        function saveUsers() {
+            localStorage.setItem(STORAGE_KEY, JSON.stringify(users));
+        }
+
+        function updateUserSelect() {
+            const names = Object.keys(users);
+            userSelect.innerHTML = '<option value="">选择已有用户</option>' + names.map((name) => {
+                const selected = name === currentUser ? " selected" : "";
+                return `<option value="${esc(name)}"${selected}>${esc(name)}</option>`;
+            }).join("");
+        }
+
+        function renderChecklist() {
+            const categories = currentCategories();
+            addCategoryRow.classList.toggle("hidden", !categories);
+            if (!categories) {
+                checklistEl.innerHTML = `
+                    <div class="empty-state">
+                        <h2>请注册或输入密码进入</h2>
+                        <p>每位跑者自己设密码，单独维护类别、物品和勾选</p>
+                    </div>`;
+                return;
+            }
+
+            checklistEl.innerHTML = categories.map((category, catIndex) => `
+                <section class="category">
+                    <div class="category-header">
+                        <span class="category-name">${esc(category.name)}</span>
+                        <button type="button" class="delete-category-btn" data-action="delete-category" data-cat="${catIndex}">删除类别</button>
+                    </div>
+                    ${category.items.map((item, itemIndex) => `
+                        <div class="item">
+                            <button type="button" class="checkbox${item.checked ? " checked" : ""}" data-action="toggle" data-cat="${catIndex}" data-item="${itemIndex}" aria-pressed="${item.checked}" aria-label="${item.checked ? "已准备" : "未准备"}">${item.checked ? "✓" : ""}</button>
+                            <span class="item-content">${esc(item.name)}</span>
+                            <button type="button" class="delete-item-btn" data-action="delete-item" data-cat="${catIndex}" data-item="${itemIndex}">删除</button>
+                        </div>
+                    `).join("")}
+                    <div class="add-item-row">
+                        <input type="text" placeholder="添加物品，注释写在同一行" data-cat="${catIndex}" autocomplete="off">
+                        <button type="button" class="btn" data-action="add-item" data-cat="${catIndex}">添加</button>
+                    </div>
+                </section>
+            `).join("");
+        }
+
+        function addUser() {
+            const nameInput = document.getElementById("newUserName");
+            const passInput = document.getElementById("newUserPassword");
+            const pass2Input = document.getElementById("newUserPassword2");
+            const name = nameInput.value.trim();
+            const password = passInput.value;
+            const password2 = pass2Input.value;
+
+            if (!name) {
+                setStatus("请填写用户名", "error");
+                return;
+            }
+            if (users[name]) {
+                setStatus("用户名已存在", "error");
+                return;
+            }
+            if (!password) {
+                setStatus("请设置密码", "error");
+                return;
+            }
+            if (password !== password2) {
+                setStatus("两次密码不一致", "error");
+                return;
+            }
+
+            users[name] = {
+                passwordHash: hashPassword(password),
+                categories: JSON.parse(JSON.stringify(defaultCategories))
+            };
+            currentUser = name;
+            nameInput.value = "";
+            passInput.value = "";
+            pass2Input.value = "";
+            document.getElementById("loginPassword").value = "";
+            saveUsers();
+            updateUserSelect();
+            setStatus(`已进入：${name}`, "ok");
+            renderChecklist();
+        }
+
+        function loginUser() {
+            const name = userSelect.value;
+            const password = document.getElementById("loginPassword").value;
+            if (!name) {
+                setStatus("请先选择用户", "error");
+                return;
+            }
+            if (!users[name]) {
+                setStatus("用户不存在", "error");
+                return;
+            }
+            if (!password) {
+                setStatus("请输入密码", "error");
+                return;
+            }
+
+            const hash = hashPassword(password);
+            const account = users[name];
+            if (!account.passwordHash) {
+                account.passwordHash = hash;
+                saveUsers();
+            } else if (account.passwordHash !== hash) {
+                setStatus("密码不正确", "error");
+                return;
+            }
+
+            currentUser = name;
+            document.getElementById("loginPassword").value = "";
+            setStatus(`已进入：${name}`, "ok");
+            renderChecklist();
+        }
+
+        function logoutUser() {
+            currentUser = "";
+            userSelect.value = "";
+            document.getElementById("loginPassword").value = "";
+            setStatus("已退出");
+            renderChecklist();
+        }
+
+        function deleteUser() {
+            const name = currentUser || userSelect.value;
+            const password = document.getElementById("loginPassword").value;
+            if (!name || !users[name]) {
+                setStatus("请选择要删除的用户", "error");
+                return;
+            }
+            if (!password) {
+                setStatus("删除前请输入该用户密码", "error");
+                return;
+            }
+            const hash = hashPassword(password);
+            if (users[name].passwordHash && users[name].passwordHash !== hash) {
+                setStatus("密码不正确", "error");
+                return;
+            }
+            delete users[name];
+            if (currentUser === name) currentUser = "";
+            document.getElementById("loginPassword").value = "";
+            saveUsers();
+            updateUserSelect();
+            setStatus(`已删除用户：${name}`);
+            renderChecklist();
+        }
+
+        function addCategory() {
+            const input = document.getElementById("newCategoryName");
+            const name = input.value.trim();
+            const categories = currentCategories();
+            if (!name || !categories) return;
+            categories.push({ name, items: [] });
+            input.value = "";
+            saveUsers();
+            renderChecklist();
+        }
+
+        function addItem(catIndex, input) {
+            const name = input.value.trim();
+            const categories = currentCategories();
+            if (!name || !categories || !categories[catIndex]) return;
+            categories[catIndex].items.push({ name, checked: false });
+            saveUsers();
+            renderChecklist();
+        }
+
+        checklistEl.addEventListener("click", (event) => {
+            const target = event.target.closest("[data-action]");
+            const categories = currentCategories();
+            if (!target || !categories) return;
+            const catIndex = Number(target.dataset.cat);
+            const itemIndex = Number(target.dataset.item);
+            const action = target.dataset.action;
+
+            if (action === "toggle") {
+                const item = categories[catIndex].items[itemIndex];
+                item.checked = !item.checked;
+                saveUsers();
+                renderChecklist();
+            } else if (action === "delete-item") {
+                categories[catIndex].items.splice(itemIndex, 1);
+                saveUsers();
+                renderChecklist();
+            } else if (action === "delete-category") {
+                categories.splice(catIndex, 1);
+                saveUsers();
+                renderChecklist();
+            } else if (action === "add-item") {
+                const input = checklistEl.querySelector(`.add-item-row input[data-cat="${catIndex}"]`);
+                if (input) addItem(catIndex, input);
+            }
+        });
+
+        checklistEl.addEventListener("keydown", (event) => {
+            if (event.key !== "Enter" || !event.target.matches(".add-item-row input")) return;
+            addItem(Number(event.target.dataset.cat), event.target);
+        });
+
+        userSelect.addEventListener("change", () => {
+            if (currentUser && userSelect.value !== currentUser) {
+                currentUser = "";
+                renderChecklist();
+                setStatus("请输入密码后进入");
+            }
+            document.getElementById("loginPassword").focus();
+        });
+
+        document.getElementById("addUserBtn").addEventListener("click", addUser);
+        document.getElementById("loginBtn").addEventListener("click", loginUser);
+        document.getElementById("logoutBtn").addEventListener("click", logoutUser);
+        document.getElementById("deleteUserBtn").addEventListener("click", deleteUser);
+        document.getElementById("loginPassword").addEventListener("keydown", (event) => {
+            if (event.key === "Enter") loginUser();
+        });
+        document.getElementById("newUserPassword2").addEventListener("keydown", (event) => {
+            if (event.key === "Enter") addUser();
+        });
+        document.getElementById("addCategoryBtn").addEventListener("click", addCategory);
+        document.getElementById("newCategoryName").addEventListener("keydown", (event) => {
+            if (event.key === "Enter") addCategory();
+        });
+
+        function loadRace() {
+            const dateInput = document.getElementById("raceDate");
+            const districtSelect = document.getElementById("districtSelect");
+            try {
+                const saved = JSON.parse(localStorage.getItem(RACE_KEY));
+                if (saved && saved.date) dateInput.value = saved.date;
+                if (saved && DISTRICTS[saved.district]) districtSelect.value = saved.district;
+            } catch (error) {
+                dateInput.value = "2026-10-25";
+                districtSelect.value = "北京房山区";
+            }
+        }
+
+        function saveRace() {
+            localStorage.setItem(RACE_KEY, JSON.stringify({
+                date: document.getElementById("raceDate").value,
+                district: document.getElementById("districtSelect").value
+            }));
+        }
+
+        function weatherMessage(text) {
+            document.getElementById("hourly").innerHTML = `<p class="weather-note">${esc(text)}</p>`;
+        }
+
+        async function loadWeather() {
+            const date = document.getElementById("raceDate").value;
+            const district = document.getElementById("districtSelect").value;
+            const coords = DISTRICTS[district];
+            saveRace();
+            if (!date || !coords) {
+                weatherMessage("请选择跑马日期和城区");
+                return;
+            }
+
+            weatherMessage("正在读取当天 6:00–14:00 预报");
+            const url = `https://api.open-meteo.com/v1/forecast?latitude=${coords[0]}&longitude=${coords[1]}&hourly=temperature_2m,weather_code,precipitation_probability&start_date=${date}&end_date=${date}&timezone=Asia%2FShanghai`;
+
+            try {
+                const response = await fetch(url);
+                const data = await response.json();
+                const times = data.hourly && data.hourly.time;
+                if (!times || !times.length) {
+                    weatherMessage("这一天暂时没有预报");
+                    return;
+                }
+
+                const hours = [];
+                times.forEach((time, index) => {
+                    const hour = Number(time.slice(11, 13));
+                    if (hour >= 6 && hour <= 14) {
+                        hours.push({
+                            label: `${hour}:00`,
+                            temp: Math.round(data.hourly.temperature_2m[index]),
+                            code: data.hourly.weather_code[index],
+                            rain: data.hourly.precipitation_probability[index]
+                        });
+                    }
+                });
+
+                if (!hours.length) {
+                    weatherMessage("这一天暂时没有 6:00–14:00 的预报");
+                    return;
+                }
+
+                document.getElementById("hourly").innerHTML = hours.map((hour) => `
+                    <div class="hour">
+                        <div class="hour-time">${hour.label.replace(":00", "")}</div>
+                        <div class="hour-icon">${WEATHER_ICONS[hour.code] || "🌤️"}</div>
+                        <div class="hour-temp">${hour.temp}°</div>
+                        <div class="hour-rain">${hour.rain == null ? "" : `${hour.rain}%`}</div>
+                    </div>
+                `).join("");
+            } catch (error) {
+                weatherMessage("暂时读不到预报");
+            }
+        }
+
+        document.getElementById("raceDate").addEventListener("change", loadWeather);
+        document.getElementById("districtSelect").addEventListener("change", loadWeather);
+
+        loadUsers();
+        updateUserSelect();
+        renderChecklist();
+        loadRace();
+        loadWeather();
+    </script>
+</body>
+</html>

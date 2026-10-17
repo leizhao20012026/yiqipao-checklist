@@ -1,0 +1,622 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>亦起跑跑团2026亦庄机器人半马物资清单</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            background: #fff;
+            border-radius: 16px;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.2);
+            overflow: hidden;
+        }
+
+        .header {
+            background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+            color: white;
+            padding: 30px 20px;
+            text-align: center;
+        }
+
+        .header h1 {
+            font-size: 24px;
+            font-weight: 600;
+            line-height: 1.5;
+        }
+
+        .user-section {
+            background: #f8f9fa;
+            padding: 20px;
+            border-bottom: 1px solid #e9ecef;
+        }
+
+        .user-section label {
+            font-size: 18px;
+            font-weight: 500;
+            color: #495057;
+            margin-right: 10px;
+        }
+
+        .user-section select {
+            font-size: 18px;
+            padding: 10px 15px;
+            border: 2px solid #dee2e6;
+            border-radius: 8px;
+            background: white;
+            cursor: pointer;
+            min-width: 150px;
+        }
+
+        .user-section select:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+
+        .user-section input {
+            font-size: 18px;
+            padding: 10px 15px;
+            border: 2px solid #dee2e6;
+            border-radius: 8px;
+            width: 150px;
+        }
+
+        .user-section input:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+
+        .btn {
+            font-size: 18px;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .btn-add {
+            background: #28a745;
+            color: white;
+            margin-left: 10px;
+        }
+
+        .btn-add:hover {
+            background: #218838;
+        }
+
+        .btn-delete {
+            background: #dc3545;
+            color: white;
+            margin-left: 5px;
+            padding: 5px 10px;
+            font-size: 14px;
+        }
+
+        .btn-delete:hover {
+            background: #c82333;
+        }
+
+        .checklist {
+            padding: 20px;
+        }
+
+        .category {
+            margin-bottom: 25px;
+        }
+
+        .category-title {
+            font-size: 22px;
+            font-weight: 600;
+            color: #667eea;
+            padding: 12px 15px;
+            background: linear-gradient(135deg, #f5f7fa 0%, #e4e8f0 100%);
+            border-radius: 10px;
+            margin-bottom: 15px;
+            border-left: 5px solid #667eea;
+        }
+
+        .category-title::before {
+            content: "▶ ";
+            font-size: 14px;
+        }
+
+        .item {
+            display: flex;
+            align-items: flex-start;
+            padding: 12px 15px;
+            margin-bottom: 8px;
+            background: #f8f9fa;
+            border-radius: 8px;
+            transition: background 0.3s;
+        }
+
+        .item:hover {
+            background: #e9ecef;
+        }
+
+        .checkbox {
+            width: 32px;
+            height: 32px;
+            min-width: 32px;
+            border-radius: 50%;
+            background: #fff;
+            border: 3px solid #dc3545;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-right: 15px;
+            margin-top: 2px;
+            transition: all 0.3s;
+            position: relative;
+        }
+
+        .checkbox::after {
+            content: "✓";
+            color: white;
+            font-size: 18px;
+            font-weight: bold;
+            display: none;
+        }
+
+        .checkbox.checked {
+            background: #28a745;
+            border-color: #28a745;
+            transform: scale(1.1);
+        }
+
+        .checkbox.checked::after {
+            display: block;
+        }
+
+        .item-content {
+            flex: 1;
+            line-height: 1.3;
+        }
+
+        .item-name {
+            font-size: 20px;
+            color: #212529;
+            font-weight: 500;
+            line-height: 1.4;
+        }
+
+        .item-note {
+            font-size: 16px;
+            color: #6c757d;
+            margin-top: 4px;
+            line-height: 1.4;
+        }
+
+        .subcategory {
+            margin-left: 20px;
+            margin-top: 10px;
+        }
+
+        .sub-item {
+            display: flex;
+            align-items: flex-start;
+            padding: 8px 12px;
+            margin-bottom: 4px;
+            background: #fff;
+            border-radius: 8px;
+            border: 1px solid #e9ecef;
+            transition: background 0.3s;
+        }
+
+        .sub-item:hover {
+            background: #f1f3f5;
+        }
+
+        .sub-item .checkbox {
+            width: 28px;
+            height: 28px;
+            min-width: 28px;
+            margin-right: 12px;
+        }
+
+        .sub-item .checkbox::after {
+            font-size: 16px;
+        }
+
+        .sub-item .item-name {
+            font-size: 18px;
+            color: #212529;
+            font-weight: 500;
+            line-height: 1.3;
+        }
+
+        .sub-item .item-note {
+            font-size: 18px;
+            color: #6c757d;
+            line-height: 1.3;
+            display: inline;
+        }
+
+        .sub-item .item-note::before {
+            content: " - ";
+        }
+
+        .item-line {
+            display: inline;
+        }
+
+        @media (max-width: 600px) {
+            .header h1 {
+                font-size: 20px;
+            }
+
+            .user-section {
+                display: flex;
+                flex-direction: column;
+                gap: 10px;
+            }
+
+            .user-section select,
+            .user-section input {
+                width: 100%;
+            }
+
+            .btn-add {
+                margin-left: 0;
+                margin-top: 10px;
+            }
+
+            .category-title {
+                font-size: 20px;
+            }
+
+            .item-name {
+                font-size: 18px;
+            }
+
+            .sub-item .item-name {
+                font-size: 16px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>亦起跑跑团2026亦庄机器人半马物资清单</h1>
+            <p style="font-size: 14px; margin-top: 10px; opacity: 0.9;">点击红色CheckBox表示相应物品准备完毕</p>
+        </div>
+
+        <div class="user-section">
+            <label for="userSelect">用户：</label>
+            <select id="userSelect">
+                <option value="">-- 选择用户 --</option>
+            </select>
+            <input type="text" id="newUserName" placeholder="新用户名">
+            <button class="btn btn-add" onclick="addUser()">添加</button>
+        </div>
+
+        <div class="checklist" id="checklist">
+            <div style="text-align: center; margin-bottom: 20px;">
+                <button class="btn btn-add" onclick="addCategory()">添加类别</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const defaultChecklistData = [
+            {
+                category: "穿戴衣物",
+                items: [
+                    { name: "速干半袖（跑团团服）", note: "不要使用棉线材质半袖" },
+                    { name: "运动短裤", note: "速干短裤、或者防磨短裤" },
+                    { name: "跑步袜", note: "" },
+                    { name: "跑鞋", note: "不要用新鞋、系双重鞋带，防止松脱" },
+                    { name: "空顶帽", note: "遮阳、吸汗" },
+                    { name: "Sports Bra（女生）", note: "" },
+                    { name: "头绳（女生）", note: "" },
+                    { name: "一次性雨衣", note: "到达起跑处开始穿用于防冻，开始起跑后丢在马路边" }
+                ]
+            },
+            {
+                category: "穿戴物品",
+                items: [
+                    { name: "太阳镜", note: "" },
+                    { name: "运动手表", note: "提前充电，记录心率、配速及成绩" },
+                    { name: "护腕", note: "擦汗" },
+                    { name: "腰包", note: "用于放手机、能量棒、盐丸等" },
+                    { name: "存包袋以及存包卡", note: "在发放物资包中" }
+                ]
+            },
+            {
+                category: "涂抹",
+                items: [
+                    { name: "防晒霜", note: "" },
+                    { name: "凡士林", note: "腋下、乳头、裆部、脚步易磨部位（容易出血），必须" },
+                    { name: "马油", note: "非必须" },
+                    { name: "肌肉贴", note: "非必须" }
+                ]
+            },
+            {
+                category: "重要物品",
+                items: [
+                    { name: "号码簿", note: "提前固定在运动衣上" },
+                    { name: "手机", note: "提前充好电" }
+                ]
+            }
+        ];
+
+        let currentUser = '';
+        let userData = {};
+
+        function getCurrentUserChecklist() {
+            if (!currentUser) {
+                return JSON.parse(JSON.stringify(defaultChecklistData));
+            }
+            if (!userData[currentUser].checklist) {
+                userData[currentUser].checklist = JSON.parse(JSON.stringify(defaultChecklistData));
+                saveUsers();
+            }
+            return userData[currentUser].checklist;
+        }
+
+        function setCurrentUserChecklist(checklist) {
+            if (currentUser) {
+                userData[currentUser].checklist = checklist;
+                saveUsers();
+            }
+        }
+
+        function loadUsers() {
+            const savedData = localStorage.getItem('marathonChecklist');
+            if (savedData) {
+                userData = JSON.parse(savedData);
+            }
+            updateUserSelect();
+        }
+
+        function saveUsers() {
+            localStorage.setItem('marathonChecklist', JSON.stringify(userData));
+        }
+
+        function updateUserSelect() {
+            const select = document.getElementById('userSelect');
+            select.innerHTML = '<option value="">-- 选择用户 --</option>';
+            Object.keys(userData).forEach(user => {
+                const option = document.createElement('option');
+                option.value = user;
+                option.textContent = user;
+                select.appendChild(option);
+            });
+        }
+
+        function addUser() {
+            const nameInput = document.getElementById('newUserName');
+            const name = nameInput.value.trim();
+            if (name && !userData[name]) {
+                userData[name] = {
+                    checklist: JSON.parse(JSON.stringify(defaultChecklistData)),
+                    items: {}
+                };
+                saveUsers();
+                updateUserSelect();
+                document.getElementById('userSelect').value = name;
+                currentUser = name;
+                loadUserData();
+                nameInput.value = '';
+            }
+        }
+
+        function deleteUser() {
+            if (!currentUser) return;
+            delete userData[currentUser];
+            saveUsers();
+            currentUser = '';
+            document.getElementById('newUserName').value = '';
+            updateUserSelect();
+            renderChecklist();
+        }
+
+        function loadUserData() {
+            if (!currentUser) {
+                renderChecklist();
+                return;
+            }
+            renderChecklist();
+        }
+
+        function toggleCheckbox(categoryIndex, itemIndex) {
+            const key = `${categoryIndex}-${itemIndex}`;
+            if (!currentUser) {
+                return;
+            }
+            if (!userData[currentUser].items) {
+                userData[currentUser].items = {};
+            }
+            if (!userData[currentUser].items[key]) {
+                userData[currentUser].items[key] = false;
+            }
+            userData[currentUser].items[key] = !userData[currentUser].items[key];
+            saveUsers();
+
+            const checkbox = document.querySelector(`[data-key="${key}"]`);
+            if (userData[currentUser].items[key]) {
+                checkbox.classList.add('checked');
+            } else {
+                checkbox.classList.remove('checked');
+            }
+        }
+
+        function renderChecklist() {
+            const container = document.getElementById('checklist');
+            container.innerHTML = '';
+
+            const checklist = getCurrentUserChecklist();
+
+            checklist.forEach((category, categoryIndex) => {
+                const categoryDiv = document.createElement('div');
+                categoryDiv.className = 'category';
+
+                const titleDiv = document.createElement('div');
+                titleDiv.className = 'category-title';
+                
+                const titleSpan = document.createElement('span');
+                titleSpan.textContent = category.category;
+                
+                const buttonsDiv = document.createElement('span');
+                buttonsDiv.style.float = 'right';
+                buttonsDiv.style.display = 'flex';
+                buttonsDiv.style.gap = '8px';
+                
+                const addItemBtn = document.createElement('button');
+                addItemBtn.className = 'btn';
+                addItemBtn.style.fontSize = '14px';
+                addItemBtn.style.padding = '4px 8px';
+                addItemBtn.style.background = '#667eea';
+                addItemBtn.style.color = 'white';
+                addItemBtn.textContent = '添加物品';
+                addItemBtn.onclick = () => addItem(categoryIndex);
+                
+                const deleteCategoryBtn = document.createElement('button');
+                deleteCategoryBtn.className = 'btn';
+                deleteCategoryBtn.style.fontSize = '14px';
+                deleteCategoryBtn.style.padding = '4px 8px';
+                deleteCategoryBtn.style.background = '#dc3545';
+                deleteCategoryBtn.style.color = 'white';
+                deleteCategoryBtn.textContent = '删除类别';
+                deleteCategoryBtn.onclick = () => deleteCategory(categoryIndex);
+                
+                buttonsDiv.appendChild(addItemBtn);
+                buttonsDiv.appendChild(deleteCategoryBtn);
+                
+                titleDiv.appendChild(titleSpan);
+                titleDiv.appendChild(buttonsDiv);
+                categoryDiv.appendChild(titleDiv);
+
+                const itemsDiv = document.createElement('div');
+                itemsDiv.className = 'subcategory';
+
+                category.items.forEach((item, itemIndex) => {
+                    const key = `${categoryIndex}-${itemIndex}`;
+                    const isChecked = currentUser && userData[currentUser] && userData[currentUser].items && userData[currentUser].items[key];
+
+                    const itemDiv = document.createElement('div');
+                    itemDiv.className = 'sub-item';
+
+                    const checkbox = document.createElement('div');
+                    checkbox.className = 'checkbox' + (isChecked ? ' checked' : '');
+                    checkbox.setAttribute('data-key', key);
+                    checkbox.onclick = () => toggleCheckbox(categoryIndex, itemIndex);
+
+                    const contentDiv = document.createElement('div');
+                    contentDiv.className = 'item-content';
+
+                    const nameDiv = document.createElement('div');
+                    nameDiv.className = 'item-name';
+                    nameDiv.style.display = 'inline';
+                    nameDiv.textContent = item.name;
+
+                    contentDiv.appendChild(nameDiv);
+
+                    if (item.note) {
+                        const noteDiv = document.createElement('div');
+                        noteDiv.className = 'item-note';
+                        noteDiv.style.display = 'inline';
+                        noteDiv.textContent = item.note;
+                        contentDiv.appendChild(noteDiv);
+                    }
+
+                    const deleteBtn = document.createElement('button');
+                    deleteBtn.className = 'btn btn-delete';
+                    deleteBtn.style.fontSize = '14px';
+                    deleteBtn.style.padding = '4px 8px';
+                    deleteBtn.textContent = '删除';
+                    deleteBtn.onclick = (e) => {
+                        e.stopPropagation();
+                        deleteItem(categoryIndex, itemIndex);
+                    };
+
+                    itemDiv.appendChild(checkbox);
+                    itemDiv.appendChild(contentDiv);
+                    itemDiv.appendChild(deleteBtn);
+                    itemsDiv.appendChild(itemDiv);
+                });
+
+                categoryDiv.appendChild(itemsDiv);
+                container.appendChild(categoryDiv);
+            });
+        }
+
+        function addItem(categoryIndex) {
+            const name = prompt('请输入物品名称：');
+            if (!name) return;
+            const note = prompt('请输入物品备注（可选）：') || '';
+            const checklist = getCurrentUserChecklist();
+            checklist[categoryIndex].items.push({ name, note });
+            setCurrentUserChecklist(checklist);
+            renderChecklist();
+        }
+
+        function deleteItem(categoryIndex, itemIndex) {
+            const checklist = getCurrentUserChecklist();
+            checklist[categoryIndex].items.splice(itemIndex, 1);
+            setCurrentUserChecklist(checklist);
+            renderChecklist();
+        }
+
+        function deleteCategory(categoryIndex) {
+            const checklist = getCurrentUserChecklist();
+            if (checklist.length <= 1) {
+                alert('至少保留一个类别');
+                return;
+            }
+            if (confirm('确定删除此类别？')) {
+                checklist.splice(categoryIndex, 1);
+                setCurrentUserChecklist(checklist);
+                renderChecklist();
+            }
+        }
+
+        function addCategory() {
+            const name = prompt('请输入类别名称：');
+            if (!name) return;
+            const checklist = getCurrentUserChecklist();
+            checklist.push({
+                category: name,
+                items: []
+            });
+            setCurrentUserChecklist(checklist);
+            renderChecklist();
+        }
+
+        document.getElementById('userSelect').onchange = function() {
+            currentUser = this.value;
+            loadUserData();
+            const deleteBtn = document.querySelector('.btn-delete');
+            if (deleteBtn) deleteBtn.remove();
+            if (currentUser) {
+                const btn = document.createElement('button');
+                btn.className = 'btn btn-delete';
+                btn.textContent = '删除用户';
+                btn.onclick = deleteUser;
+                document.querySelector('.user-section').appendChild(btn);
+            }
+        };
+
+        loadUsers();
+        renderChecklist();
+    </script>
+</body>
+</html>
