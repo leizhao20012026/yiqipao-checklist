@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>亦起跑跑团马拉松物资清单</title>
+    <title>亦起跑-马拉松清单</title>
     <style>
         * {
             margin: 0;
@@ -48,13 +48,6 @@
             font-weight: 700;
         }
 
-        .subtitle {
-            margin-top: 4px;
-            font-size: 14px;
-            line-height: 1.3;
-            color: #8a6270;
-        }
-
         .race {
             border: 1px solid #e6eaf2;
             background: #f7f9fc;
@@ -65,10 +58,16 @@
 
         .race-controls {
             display: flex;
-            flex-wrap: wrap;
-            gap: 6px 12px;
             align-items: center;
+            gap: 12px;
             margin-bottom: 4px;
+        }
+
+        .race-fields {
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+            align-items: flex-start;
         }
 
         .race-controls label {
@@ -92,38 +91,38 @@
         .hourly {
             display: flex;
             flex-wrap: nowrap;
-            gap: 2px;
+            justify-content: flex-start;
+            gap: 4px;
             overflow-x: auto;
             -webkit-overflow-scrolling: touch;
         }
 
         .hour {
-            flex: 1 1 0;
-            min-width: 34px;
+            flex: 0 0 auto;
             text-align: center;
             background: #fff;
             border-radius: 6px;
-            padding: 2px 1px;
-            line-height: 1.1;
+            padding: 3px 6px;
+            line-height: 1.15;
         }
 
         .hour-time {
-            font-size: 10px;
+            font-size: 14px;
             color: #667085;
         }
 
         .hour-icon {
-            font-size: 12px;
-            line-height: 1;
+            font-size: 22px;
+            line-height: 1.1;
         }
 
         .hour-temp {
-            font-size: 11px;
+            font-size: 16px;
             font-weight: 650;
         }
 
         .hour-rain {
-            font-size: 9px;
+            font-size: 13px;
             color: #6d7c93;
         }
 
@@ -134,6 +133,12 @@
             text-align: center;
             padding: 2px 0;
             white-space: nowrap;
+        }
+
+        .export-row {
+            display: flex;
+            gap: 8px;
+            margin: 0 0 12px;
         }
 
         .user-section {
@@ -148,6 +153,22 @@
             flex-wrap: wrap;
             gap: 8px;
             align-items: center;
+        }
+
+        #sessionBar {
+            margin-left: auto;
+            flex-shrink: 0;
+            gap: 6px;
+        }
+
+        #sessionBar .user-status {
+            min-height: 0;
+            font-size: 14px;
+        }
+
+        #logoutBtn {
+            padding: 4px 10px;
+            font-size: 14px;
         }
 
         .user-section select,
@@ -315,6 +336,31 @@
             line-height: 1.35;
         }
 
+        .admin-user {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding: 6px 8px;
+        }
+
+        .admin-user .item-content {
+            font-size: 20px;
+        }
+
+        .admin-edit {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            padding: 0 8px 8px 8px;
+        }
+
+        .admin-edit input {
+            font-size: 16px;
+            padding: 6px 8px;
+            border: 1px solid #d5dbe6;
+            border-radius: 8px;
+        }
+
         .hidden {
             display: none;
         }
@@ -340,13 +386,13 @@
         <header class="header">
             <img class="logo" src="assets/logo.png" alt="亦起跑跑团">
             <div>
-                <h1>《亦起跑跑团马拉松物资清单》</h1>
-                <p class="subtitle">点击红色CheckBox表示相应物品准备完毕</p>
+                <h1>亦起跑-马拉松清单</h1>
             </div>
         </header>
 
-        <section class="race">
+        <section class="race" id="raceSection">
             <div class="race-controls">
+                <div class="race-fields">
                 <label>跑马日期
                     <input type="date" id="raceDate" value="2026-10-25">
                 </label>
@@ -370,20 +416,29 @@
                         <option value="北京延庆区">北京延庆区</option>
                     </select>
                 </label>
+                </div>
+                <div class="user-row hidden" id="sessionBar">
+                    <span class="user-status ok" id="sessionName"></span>
+                    <button type="button" class="btn" id="logoutBtn">退出</button>
+                </div>
             </div>
             <div class="hourly" id="hourly">
-                <p class="weather-note">正在读取当天 6:00–14:00 预报</p>
+                <p class="weather-note">正在读取当天 6:00–12:00 预报</p>
             </div>
         </section>
 
-        <div class="user-section">
+        <div class="export-row hidden" id="exportRow">
+            <button type="button" class="btn" id="pdfBtn">保存 PDF</button>
+            <button type="button" class="btn" id="jpgBtn">保存图片</button>
+        </div>
+
+        <div class="user-section" id="authPanel">
             <div class="user-row">
                 <select id="userSelect">
                     <option value="">选择已有用户</option>
                 </select>
                 <input type="password" id="loginPassword" placeholder="输入密码进入" autocomplete="current-password">
                 <button type="button" class="btn" id="loginBtn">进入</button>
-                <button type="button" class="btn" id="logoutBtn">退出</button>
                 <button type="button" class="btn btn-danger" id="deleteUserBtn">删除用户</button>
             </div>
             <div class="user-row">
@@ -482,6 +537,7 @@
 
         let users = {};
         let currentUser = "";
+        let token = "";
 
         const checklistEl = document.getElementById("checklist");
         const userSelect = document.getElementById("userSelect");
@@ -503,46 +559,83 @@
             userStatus.className = "user-status" + (type ? ` ${type}` : "");
         }
 
-        function hashPassword(password) {
-            const text = `running-checklist:${password}`;
-            let hash = 2166136261;
-            for (let i = 0; i < text.length; i += 1) {
-                hash ^= text.charCodeAt(i);
-                hash = Math.imul(hash, 16777619);
-            }
-            return `local-${(hash >>> 0).toString(16)}-${text.length}`;
-        }
-
-        function normalizeUsers(raw) {
-            const next = {};
-            Object.keys(raw || {}).forEach((name) => {
-                const value = raw[name];
-                if (Array.isArray(value)) {
-                    next[name] = { passwordHash: "", categories: value };
-                } else if (value && Array.isArray(value.categories)) {
-                    next[name] = {
-                        passwordHash: value.passwordHash || "",
-                        categories: value.categories
-                    };
-                }
-            });
-            return next;
-        }
+        const ADMIN_NAME = "admin";
 
         function currentCategories() {
             return currentUser && users[currentUser] ? users[currentUser].categories : null;
         }
 
-        function loadUsers() {
-            try {
-                users = normalizeUsers(JSON.parse(localStorage.getItem(STORAGE_KEY)) || {});
-            } catch (error) {
-                users = {};
-            }
+        function isAdminUser() {
+            return Boolean(currentUser && users[currentUser] && users[currentUser].role === "admin");
         }
 
-        function saveUsers() {
-            localStorage.setItem(STORAGE_KEY, JSON.stringify(users));
+        async function api(path, options = {}) {
+            const headers = { "Content-Type": "application/json" };
+            if (token) headers.Authorization = `Bearer ${token}`;
+            const response = await fetch(path, {
+                method: options.method || "GET",
+                headers,
+                body: options.body ? JSON.stringify(options.body) : undefined
+            });
+            const data = await response.json().catch(() => ({}));
+            if (!response.ok) throw new Error(data.error || "请求失败");
+            return data;
+        }
+
+        function applyUserList(list) {
+            const next = {};
+            list.forEach((user) => {
+                const previous = users[user.username];
+                next[user.username] = {
+                    role: user.role,
+                    categories: previous && previous.categories ? previous.categories : null
+                };
+            });
+            if (currentUser && next[currentUser] && users[currentUser]) {
+                next[currentUser].categories = users[currentUser].categories;
+                next[currentUser].role = users[currentUser].role || next[currentUser].role;
+            }
+            users = next;
+        }
+
+        async function refreshUserList() {
+            const data = await api("/api/users");
+            applyUserList(data.users || []);
+            updateUserSelect();
+        }
+
+        async function migrateLocalUsers() {
+            if (localStorage.getItem("running_checklist_migrated")) return;
+            const raw = localStorage.getItem(STORAGE_KEY);
+            if (!raw) {
+                localStorage.setItem("running_checklist_migrated", "1");
+                return;
+            }
+            let stored = {};
+            try {
+                stored = JSON.parse(raw) || {};
+            } catch (error) {
+                stored = {};
+            }
+            const payload = {};
+            Object.keys(stored).forEach((name) => {
+                const value = stored[name];
+                if (Array.isArray(value)) {
+                    payload[name] = { passwordHash: "", categories: value };
+                } else if (value && value.passwordHash) {
+                    payload[name] = {
+                        passwordHash: value.passwordHash,
+                        categories: value.categories || []
+                    };
+                }
+            });
+            await api("/api/migrate", { method: "POST", body: { users: payload } });
+            localStorage.setItem("running_checklist_migrated", "1");
+        }
+
+        async function persistCategories() {
+            if (!currentUser || isAdminUser()) return;
+            await api("/api/me", { method: "PUT", body: { categories: users[currentUser].categories } });
         }
 
         function updateUserSelect() {
@@ -553,8 +646,50 @@
             }).join("");
         }
 
+        function updateSessionBar() {
+            const loggedIn = Boolean(currentUser && users[currentUser]);
+            document.getElementById("authPanel").classList.toggle("hidden", loggedIn);
+            document.getElementById("sessionBar").classList.toggle("hidden", !loggedIn);
+            document.getElementById("sessionName").textContent = loggedIn ? currentUser : "";
+        }
+
+        function renderAdmin() {
+            const names = Object.keys(users).filter((name) => name !== ADMIN_NAME);
+            const rows = names.length ? names.map((name) => `
+                <div class="admin-user">
+                    <span class="item-content">${esc(name)}</span>
+                    <button type="button" class="btn" data-action="edit-user" data-name="${esc(name)}">修改</button>
+                    <button type="button" class="delete-item-btn" data-action="remove-user" data-name="${esc(name)}">删除</button>
+                </div>
+                <div class="admin-edit hidden" data-edit="${esc(name)}">
+                    <input type="text" data-field="name" value="${esc(name)}" placeholder="新用户名">
+                    <input type="password" data-field="password" placeholder="新密码，不改可留空" autocomplete="new-password">
+                    <button type="button" class="btn" data-action="save-user" data-name="${esc(name)}">保存</button>
+                </div>
+            `).join("") : `<div class="empty-state"><p>还没有其他用户</p></div>`;
+            checklistEl.innerHTML = `
+                <section class="category">
+                    <div class="category-header">
+                        <span class="category-name">用户列表</span>
+                        <button type="button" class="delete-category-btn" data-action="admin-logout">退出</button>
+                    </div>
+                    ${userStatus.textContent ? `<p class="user-status ${userStatus.classList.contains("error") ? "error" : "ok"}">${esc(userStatus.textContent)}</p>` : ""}
+                    ${rows}
+                </section>`;
+        }
+
         function renderChecklist() {
             const categories = currentCategories();
+            updateSessionBar();
+            document.querySelector(".race-fields").classList.toggle("hidden", isAdminUser());
+            document.getElementById("hourly").classList.toggle("hidden", isAdminUser());
+            if (isAdminUser()) {
+                addCategoryRow.classList.add("hidden");
+                document.getElementById("exportRow").classList.add("hidden");
+                renderAdmin();
+                return;
+            }
+            document.getElementById("exportRow").classList.toggle("hidden", !categories);
             addCategoryRow.classList.toggle("hidden", !categories);
             if (!categories) {
                 checklistEl.innerHTML = `
@@ -586,7 +721,7 @@
             `).join("");
         }
 
-        function addUser() {
+        async function addUser() {
             const nameInput = document.getElementById("newUserName");
             const passInput = document.getElementById("newUserPassword");
             const pass2Input = document.getElementById("newUserPassword2");
@@ -598,7 +733,7 @@
                 setStatus("请填写用户名", "error");
                 return;
             }
-            if (users[name]) {
+            if (name === ADMIN_NAME || users[name]) {
                 setStatus("用户名已存在", "error");
                 return;
             }
@@ -611,30 +746,28 @@
                 return;
             }
 
-            users[name] = {
-                passwordHash: hashPassword(password),
-                categories: JSON.parse(JSON.stringify(defaultCategories))
-            };
-            currentUser = name;
-            nameInput.value = "";
-            passInput.value = "";
-            pass2Input.value = "";
-            document.getElementById("loginPassword").value = "";
-            saveUsers();
-            updateUserSelect();
-            setStatus(`已进入：${name}`, "ok");
-            renderChecklist();
+            try {
+                const data = await api("/api/register", { method: "POST", body: { username: name, password } });
+                token = data.token;
+                currentUser = name;
+                users[name] = { role: "user", categories: data.categories };
+                nameInput.value = "";
+                passInput.value = "";
+                pass2Input.value = "";
+                document.getElementById("loginPassword").value = "";
+                updateUserSelect();
+                setStatus(`已进入：${name}`, "ok");
+                renderChecklist();
+            } catch (error) {
+                setStatus(error.message, "error");
+            }
         }
 
-        function loginUser() {
+        async function loginUser() {
             const name = userSelect.value;
             const password = document.getElementById("loginPassword").value;
             if (!name) {
                 setStatus("请先选择用户", "error");
-                return;
-            }
-            if (!users[name]) {
-                setStatus("用户不存在", "error");
                 return;
             }
             if (!password) {
@@ -642,77 +775,142 @@
                 return;
             }
 
-            const hash = hashPassword(password);
-            const account = users[name];
-            if (!account.passwordHash) {
-                account.passwordHash = hash;
-                saveUsers();
-            } else if (account.passwordHash !== hash) {
-                setStatus("密码不正确", "error");
-                return;
+            try {
+                const data = await api("/api/login", { method: "POST", body: { username: name, password } });
+                token = data.token;
+                currentUser = name;
+                users[name] = { role: data.user.role, categories: data.categories };
+                document.getElementById("loginPassword").value = "";
+                updateUserSelect();
+                setStatus(`已进入：${name}`, "ok");
+                renderChecklist();
+            } catch (error) {
+                setStatus(error.message, "error");
             }
-
-            currentUser = name;
-            document.getElementById("loginPassword").value = "";
-            setStatus(`已进入：${name}`, "ok");
-            renderChecklist();
         }
 
         function logoutUser() {
             currentUser = "";
+            token = "";
             userSelect.value = "";
             document.getElementById("loginPassword").value = "";
             setStatus("已退出");
             renderChecklist();
         }
 
-        function deleteUser() {
+        async function deleteUser() {
             const name = currentUser || userSelect.value;
             const password = document.getElementById("loginPassword").value;
             if (!name || !users[name]) {
                 setStatus("请选择要删除的用户", "error");
                 return;
             }
+            if (name === ADMIN_NAME) {
+                setStatus("不能删除超级用户", "error");
+                return;
+            }
             if (!password) {
                 setStatus("删除前请输入该用户密码", "error");
                 return;
             }
-            const hash = hashPassword(password);
-            if (users[name].passwordHash && users[name].passwordHash !== hash) {
-                setStatus("密码不正确", "error");
-                return;
+            try {
+                await api("/api/delete-account", { method: "POST", body: { username: name, password } });
+                delete users[name];
+                if (currentUser === name) {
+                    currentUser = "";
+                    token = "";
+                }
+                document.getElementById("loginPassword").value = "";
+                updateUserSelect();
+                setStatus(`已删除用户：${name}`);
+                renderChecklist();
+            } catch (error) {
+                setStatus(error.message, "error");
             }
-            delete users[name];
-            if (currentUser === name) currentUser = "";
-            document.getElementById("loginPassword").value = "";
-            saveUsers();
-            updateUserSelect();
-            setStatus(`已删除用户：${name}`);
-            renderChecklist();
         }
 
-        function addCategory() {
+        async function addCategory() {
             const input = document.getElementById("newCategoryName");
             const name = input.value.trim();
             const categories = currentCategories();
             if (!name || !categories) return;
             categories.push({ name, items: [] });
             input.value = "";
-            saveUsers();
-            renderChecklist();
+            try {
+                await persistCategories();
+                renderChecklist();
+            } catch (error) {
+                setStatus(error.message, "error");
+            }
         }
 
-        function addItem(catIndex, input) {
+        async function addItem(catIndex, input) {
             const name = input.value.trim();
             const categories = currentCategories();
             if (!name || !categories || !categories[catIndex]) return;
             categories[catIndex].items.push({ name, checked: false });
-            saveUsers();
-            renderChecklist();
+            try {
+                await persistCategories();
+                renderChecklist();
+            } catch (error) {
+                setStatus(error.message, "error");
+            }
         }
 
-        checklistEl.addEventListener("click", (event) => {
+        async function saveManagedUser(oldName) {
+            const box = checklistEl.querySelector(`[data-edit="${CSS.escape(oldName)}"]`);
+            if (!box || !users[oldName] || oldName === ADMIN_NAME) return;
+            const newName = box.querySelector('[data-field="name"]').value.trim();
+            const newPassword = box.querySelector('[data-field="password"]').value;
+            if (!newName) {
+                setStatus("请填写用户名", "error");
+                return;
+            }
+            if (newName !== oldName && (newName === ADMIN_NAME || users[newName])) {
+                setStatus("用户名已存在", "error");
+                return;
+            }
+            try {
+                await api("/api/users", {
+                    method: "PATCH",
+                    body: { oldName, newName, newPassword }
+                });
+                await refreshUserList();
+                setStatus(`已更新：${newName}`, "ok");
+                renderAdmin();
+            } catch (error) {
+                setStatus(error.message, "error");
+                renderAdmin();
+            }
+        }
+
+        checklistEl.addEventListener("click", async (event) => {
             const target = event.target.closest("[data-action]");
+            if (target && isAdminUser()) {
+                const name = target.dataset.name;
+                if (target.dataset.action === "admin-logout") {
+                    logoutUser();
+                } else if (target.dataset.action === "edit-user") {
+                    const box = checklistEl.querySelector(`[data-edit="${CSS.escape(name)}"]`);
+                    if (box) box.classList.toggle("hidden");
+                } else if (target.dataset.action === "remove-user") {
+                    if (name && name !== ADMIN_NAME && users[name]) {
+                        try {
+                            await api("/api/users", { method: "DELETE", body: { username: name } });
+                            delete users[name];
+                            updateUserSelect();
+                            setStatus(`已删除用户：${name}`);
+                            renderAdmin();
+                        } catch (error) {
+                            setStatus(error.message, "error");
+                            renderAdmin();
+                        }
+                    }
+                } else if (target.dataset.action === "save-user") {
+                    saveManagedUser(name);
+                }
+                return;
+            }
             const categories = currentCategories();
             if (!target || !categories) return;
             const catIndex = Number(target.dataset.cat);
@@ -722,16 +920,31 @@
             if (action === "toggle") {
                 const item = categories[catIndex].items[itemIndex];
                 item.checked = !item.checked;
-                saveUsers();
-                renderChecklist();
+                try {
+                    await persistCategories();
+                    renderChecklist();
+                } catch (error) {
+                    item.checked = !item.checked;
+                    setStatus(error.message, "error");
+                }
             } else if (action === "delete-item") {
-                categories[catIndex].items.splice(itemIndex, 1);
-                saveUsers();
-                renderChecklist();
+                const removed = categories[catIndex].items.splice(itemIndex, 1);
+                try {
+                    await persistCategories();
+                    renderChecklist();
+                } catch (error) {
+                    categories[catIndex].items.splice(itemIndex, 0, ...removed);
+                    setStatus(error.message, "error");
+                }
             } else if (action === "delete-category") {
-                categories.splice(catIndex, 1);
-                saveUsers();
-                renderChecklist();
+                const removed = categories.splice(catIndex, 1);
+                try {
+                    await persistCategories();
+                    renderChecklist();
+                } catch (error) {
+                    categories.splice(catIndex, 0, ...removed);
+                    setStatus(error.message, "error");
+                }
             } else if (action === "add-item") {
                 const input = checklistEl.querySelector(`.add-item-row input[data-cat="${catIndex}"]`);
                 if (input) addItem(catIndex, input);
@@ -801,7 +1014,7 @@
                 return;
             }
 
-            weatherMessage("正在读取当天 6:00–14:00 预报");
+            weatherMessage("正在读取当天 6:00–12:00 预报");
             const url = `https://api.open-meteo.com/v1/forecast?latitude=${coords[0]}&longitude=${coords[1]}&hourly=temperature_2m,weather_code,precipitation_probability&start_date=${date}&end_date=${date}&timezone=Asia%2FShanghai`;
 
             try {
@@ -816,7 +1029,7 @@
                 const hours = [];
                 times.forEach((time, index) => {
                     const hour = Number(time.slice(11, 13));
-                    if (hour >= 6 && hour <= 14) {
+                    if (hour >= 6 && hour <= 12) {
                         hours.push({
                             label: `${hour}:00`,
                             temp: Math.round(data.hourly.temperature_2m[index]),
@@ -827,13 +1040,13 @@
                 });
 
                 if (!hours.length) {
-                    weatherMessage("这一天暂时没有 6:00–14:00 的预报");
+                    weatherMessage("这一天暂时没有 6:00–12:00 的预报");
                     return;
                 }
 
                 document.getElementById("hourly").innerHTML = hours.map((hour) => `
                     <div class="hour">
-                        <div class="hour-time">${hour.label.replace(":00", "")}</div>
+                        <div class="hour-time">${hour.label}</div>
                         <div class="hour-icon">${WEATHER_ICONS[hour.code] || "🌤️"}</div>
                         <div class="hour-temp">${hour.temp}°</div>
                         <div class="hour-rain">${hour.rain == null ? "" : `${hour.rain}%`}</div>
@@ -844,14 +1057,232 @@
             }
         }
 
+        function exportSnapshot() {
+            const date = document.getElementById("raceDate").value;
+            const district = document.getElementById("districtSelect").value;
+            const weather = [...document.querySelectorAll("#hourly .hour")].map((el) => ({
+                time: el.querySelector(".hour-time").textContent,
+                icon: el.querySelector(".hour-icon").textContent,
+                temp: el.querySelector(".hour-temp").textContent,
+                rain: el.querySelector(".hour-rain").textContent
+            }));
+            return {
+                title: "亦起跑-马拉松清单",
+                user: currentUser,
+                date,
+                district,
+                weather,
+                categories: currentCategories() || []
+            };
+        }
+
+        function exportFileName(ext) {
+            const date = document.getElementById("raceDate").value || "清单";
+            return `亦起跑-马拉松清单-${currentUser}-${date}.${ext}`;
+        }
+
+        function exportHtml(data) {
+            const weather = data.weather.length ? data.weather.map((hour) => `
+                <div class="hour">
+                    <div>${hour.time}</div>
+                    <div class="icon">${hour.icon}</div>
+                    <div>${hour.temp}</div>
+                    <div class="rain">${hour.rain}</div>
+                </div>`).join("") : `<p>暂无 6:00–12:00 预报</p>`;
+            const lists = data.categories.map((category) => `
+                <h2>${esc(category.name)}</h2>
+                ${category.items.map((item) => `
+                    <div class="item">
+                        <span class="box ${item.checked ? "on" : ""}">${item.checked ? "✓" : ""}</span>
+                        <span>${esc(item.name)}</span>
+                    </div>`).join("")}
+            `).join("");
+            return `<!DOCTYPE html>
+<html lang="zh-CN"><head><meta charset="UTF-8"><title>${esc(data.title)}</title>
+<style>
+  body { font-family: "PingFang SC", "Microsoft YaHei", sans-serif; color: #1f2430; margin: 24px; }
+  h1 { font-size: 28px; margin: 0 0 8px; }
+  .meta { font-size: 16px; margin-bottom: 12px; }
+  .weather { display: flex; gap: 8px; margin-bottom: 16px; }
+  .hour { border: 1px solid #e6eaf2; border-radius: 8px; padding: 6px 8px; text-align: center; font-size: 14px; }
+  .icon { font-size: 20px; }
+  .rain { color: #6d7c93; font-size: 13px; }
+  h2 { font-size: 18px; background: #e23b4a; color: #fff; padding: 6px 10px; border-radius: 8px; }
+  .item { display: flex; gap: 8px; align-items: flex-start; font-size: 16px; line-height: 1.35; margin: 6px 0; }
+  .box { width: 18px; height: 18px; border: 2px solid #e23b4a; border-radius: 4px; display: inline-flex; align-items: center; justify-content: center; flex-shrink: 0; color: transparent; }
+  .box.on { background: #1f9d55; border-color: #1f9d55; color: #fff; }
+  @page { margin: 12mm; }
+</style></head><body>
+  <h1>${esc(data.title)}</h1>
+  <div class="meta">${esc(data.user)}　${esc(data.date)}　${esc(data.district)}</div>
+  <div class="weather">${weather}</div>
+  ${lists}
+</body></html>`;
+        }
+
+        function savePdf() {
+            const categories = currentCategories();
+            if (!categories) return;
+            const frame = document.createElement("iframe");
+            frame.style.position = "fixed";
+            frame.style.right = "0";
+            frame.style.bottom = "0";
+            frame.style.width = "0";
+            frame.style.height = "0";
+            frame.style.border = "0";
+            document.body.appendChild(frame);
+            const doc = frame.contentDocument;
+            doc.open();
+            doc.write(exportHtml(exportSnapshot()));
+            doc.close();
+            setTimeout(() => {
+                frame.contentWindow.focus();
+                frame.contentWindow.print();
+                setTimeout(() => frame.remove(), 1500);
+            }, 250);
+        }
+
+        function wrapText(ctx, text, maxWidth) {
+            const lines = [];
+            let line = "";
+            for (const ch of text) {
+                const next = line + ch;
+                if (line && ctx.measureText(next).width > maxWidth) {
+                    lines.push(line);
+                    line = ch;
+                } else {
+                    line = next;
+                }
+            }
+            if (line) lines.push(line);
+            return lines.length ? lines : [""];
+        }
+
+        async function saveJpg() {
+            const categories = currentCategories();
+            if (!categories) return;
+            await document.fonts.ready;
+            const data = exportSnapshot();
+            const width = 900;
+            const pad = 36;
+            const contentWidth = width - pad * 2;
+            const font = '"PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", sans-serif';
+            const measure = document.createElement("canvas").getContext("2d");
+            measure.font = `20px ${font}`;
+            let height = pad + 48 + 32 + 92;
+            const boxSize = 22;
+            const textLeft = pad + boxSize + 10;
+            data.categories.forEach((category) => {
+                height += 42;
+                category.items.forEach((item) => {
+                    const lines = wrapText(measure, item.name, width - textLeft - pad);
+                    height += Math.max(boxSize, lines.length * 28) + 8;
+                });
+            });
+            height += pad;
+
+            const canvas = document.createElement("canvas");
+            const scale = 2;
+            canvas.width = width * scale;
+            canvas.height = height * scale;
+            const ctx = canvas.getContext("2d");
+            ctx.scale(scale, scale);
+            ctx.fillStyle = "#ffffff";
+            ctx.fillRect(0, 0, width, height);
+            ctx.fillStyle = "#1f2430";
+            ctx.font = `bold 32px ${font}`;
+            ctx.fillText(data.title, pad, pad + 28);
+            ctx.font = `18px ${font}`;
+            ctx.fillStyle = "#4d5668";
+            ctx.fillText(`${data.user}    ${data.date}    ${data.district}`, pad, pad + 62);
+
+            let x = pad;
+            const weatherY = pad + 84;
+            ctx.font = `16px ${font}`;
+            if (!data.weather.length) {
+                ctx.fillText("暂无 6:00–12:00 预报", pad, weatherY + 28);
+            }
+            data.weather.forEach((hour) => {
+                ctx.fillStyle = "#f7f9fc";
+                ctx.fillRect(x, weatherY, 108, 78);
+                ctx.fillStyle = "#667085";
+                ctx.font = `14px ${font}`;
+                ctx.fillText(hour.time, x + 8, weatherY + 20);
+                ctx.font = `22px ${font}`;
+                ctx.fillStyle = "#1f2430";
+                ctx.fillText(hour.icon, x + 8, weatherY + 46);
+                ctx.font = `16px ${font}`;
+                ctx.fillText(`${hour.temp}  ${hour.rain}`, x + 40, weatherY + 46);
+                x += 116;
+            });
+
+            let y = weatherY + 102;
+            data.categories.forEach((category) => {
+                ctx.fillStyle = "#e23b4a";
+                ctx.fillRect(pad, y, contentWidth, 32);
+                ctx.fillStyle = "#ffffff";
+                ctx.font = `bold 18px ${font}`;
+                ctx.fillText(category.name, pad + 10, y + 22);
+                y += 42;
+                category.items.forEach((item) => {
+                    ctx.save();
+                    ctx.lineWidth = 3;
+                    ctx.strokeStyle = item.checked ? "#1f9d55" : "#e23b4a";
+                    ctx.fillStyle = item.checked ? "#1f9d55" : "#ffffff";
+                    ctx.beginPath();
+                    ctx.roundRect(pad, y, boxSize, boxSize, 6);
+                    ctx.fill();
+                    ctx.stroke();
+                    if (item.checked) {
+                        ctx.strokeStyle = "#ffffff";
+                        ctx.lineWidth = 2.5;
+                        ctx.lineCap = "round";
+                        ctx.lineJoin = "round";
+                        ctx.beginPath();
+                        ctx.moveTo(pad + 5, y + 11);
+                        ctx.lineTo(pad + 9, y + 16);
+                        ctx.lineTo(pad + 17, y + 6);
+                        ctx.stroke();
+                    }
+                    ctx.restore();
+                    ctx.font = `20px ${font}`;
+                    ctx.fillStyle = "#1f2430";
+                    const lines = wrapText(ctx, item.name, width - textLeft - pad);
+                    lines.forEach((line, index) => {
+                        ctx.fillText(line, textLeft, y + 18 + index * 28);
+                    });
+                    y += Math.max(boxSize, lines.length * 28) + 8;
+                });
+            });
+
+            const link = document.createElement("a");
+            link.href = canvas.toDataURL("image/jpeg", 0.92);
+            link.download = exportFileName("jpg");
+            link.click();
+        }
+
+        document.getElementById("pdfBtn").addEventListener("click", savePdf);
+        document.getElementById("jpgBtn").addEventListener("click", saveJpg);
+
         document.getElementById("raceDate").addEventListener("change", loadWeather);
         document.getElementById("districtSelect").addEventListener("change", loadWeather);
 
-        loadUsers();
-        updateUserSelect();
-        renderChecklist();
-        loadRace();
-        loadWeather();
+        async function boot() {
+            renderChecklist();
+            loadRace();
+            loadWeather();
+            setStatus("正在读取用户");
+            try {
+                await migrateLocalUsers();
+                await refreshUserList();
+                setStatus("");
+            } catch (error) {
+                setStatus("暂时连不上服务器", "error");
+            }
+            renderChecklist();
+        }
+
+        boot();
     </script>
 </body>
 </html>
